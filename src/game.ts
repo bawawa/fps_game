@@ -1,4 +1,8 @@
 import * as THREE from '../library/three.module'
+import {Octree} from '../library/math/Octree'
+import {Capsule} from '../library/math/Capsule'
+import Player from "./player";
+import Controler from "./Controler";
 
 interface bulletAttr{
     mesh: THREE.Mesh;
@@ -25,7 +29,6 @@ class Game{
     /**
      * TODO: 使用方法
      * */
-    readonly NUM_SPHERES: number;
     /**
      * TODO：使用方法
      * */
@@ -36,9 +39,19 @@ class Game{
     readonly STEPS_PER_FRAME: number;
     readonly sphereGeometry: THREE.IcosahedronGeometry;
     readonly sphereMaterial: THREE.MeshLambertMaterial;
-    spheres: bulletAttr[];
-    sphereIdx: number;
+    readonly worldOctree: Octree;
+    readonly playerCollider: Capsule;
+    readonly playerVelocity: THREE.Vector3;
+    readonly playerDirection: THREE.Vector3;
+    readonly vector1: THREE.Vector3;
+    readonly vector2: THREE.Vector3;
+    readonly vector3: THREE.Vector3;
 
+    sphereIdx: number;
+    playerOnFloor: boolean;
+    mouseTime: number;
+    keyStates: any;
+    onResizeFun: Function;
 
 
     constructor() {
@@ -50,15 +63,21 @@ class Game{
         this.container = document.getElementById("container");
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.GRAVITY = 30;
-        this.NUM_SPHERES = 100;
-        this.SPHERE_RADIUS = 0.2;
         this.STEPS_PER_FRAME = 5;
         this.sphereGeometry = new THREE.IcosahedronGeometry( this.SPHERE_RADIUS, 5 );
         this.sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xbbbb44 } );
-        this.spheres = [];
         this.sphereIdx = 0;
-
-
+        this.worldOctree = new Octree();
+        this.playerCollider = new Capsule(new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 1, 0 ), 0.35);
+        this.playerVelocity = new THREE.Vector3();
+        this.playerDirection = new THREE.Vector3();
+        this.playerOnFloor = false;
+        this.mouseTime = 0;
+        this.keyStates = {};
+        this.vector1 = new THREE.Vector3();
+        this.vector2 = new THREE.Vector3();
+        this.vector3 = new THREE.Vector3();
+        this.onResizeFun = this.onWindowResize;
 
 
         this.init();
@@ -93,21 +112,51 @@ class Game{
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.container.appendChild( this.renderer.domElement );
 
-        for ( let i = 0; i < this.NUM_SPHERES; i ++ ) {
+        window.addEventListener('resize', this.onResizeFun())
 
-            const sphere = new THREE.Mesh( this.sphereGeometry, this.sphereMaterial );
-            sphere.castShadow = true;
-            sphere.receiveShadow = true;
 
-            this.scene.add( sphere );
 
-            this.spheres.push( {
-                mesh: sphere,
-                collider: new THREE.Sphere( new THREE.Vector3( 0, - 100, 0 ), this.SPHERE_RADIUS ),
-                velocity: new THREE.Vector3()
-            } );
+    }
+
+    destroy(){
+        window.removeEventListener('resize', this.onResizeFun());
+    }
+
+    onWindowResize() {
+
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize( window.innerWidth, window.innerHeight );
+
+    }
+
+    animate() {
+
+        const deltaTime = Math.min( 0.05, this.clock.getDelta() ) / this.STEPS_PER_FRAME;
+
+        // we look for collisions in substeps to mitigate the risk of
+        // an object traversing another too quickly for detection.
+
+        for ( let i = 0; i < this.STEPS_PER_FRAME; i ++ ) {
+
+            // controls( deltaTime );
+            //
+            // updatePlayer( deltaTime );
+            //
+            // updateSpheres( deltaTime );
+            //
+            // teleportPlayerIfOob();
 
         }
+
+        this.renderer.render( this.scene, this.camera );
+
+
+        requestAnimationFrame( this.animate );
+
     }
 
 }
+
+export default Game;
