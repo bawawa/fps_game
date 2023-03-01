@@ -1,6 +1,5 @@
 import * as THREE from '../library/three.module'
-import {Octree} from '../library/math/Octree'
-import {Capsule} from '../library/math/Capsule'
+
 import Player from "./player";
 import Controler from "./Controler";
 
@@ -39,19 +38,15 @@ class Game{
     readonly STEPS_PER_FRAME: number;
     readonly sphereGeometry: THREE.IcosahedronGeometry;
     readonly sphereMaterial: THREE.MeshLambertMaterial;
-    readonly worldOctree: Octree;
-    readonly playerCollider: Capsule;
     readonly playerVelocity: THREE.Vector3;
     readonly playerDirection: THREE.Vector3;
-    readonly vector1: THREE.Vector3;
-    readonly vector2: THREE.Vector3;
-    readonly vector3: THREE.Vector3;
 
-    sphereIdx: number;
+
     playerOnFloor: boolean;
-    mouseTime: number;
     keyStates: any;
     onResizeFun: Function;
+    player: Player;
+    controler: Controler;
 
 
     constructor() {
@@ -66,17 +61,13 @@ class Game{
         this.STEPS_PER_FRAME = 5;
         this.sphereGeometry = new THREE.IcosahedronGeometry( this.SPHERE_RADIUS, 5 );
         this.sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xbbbb44 } );
-        this.sphereIdx = 0;
-        this.worldOctree = new Octree();
-        this.playerCollider = new Capsule(new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 1, 0 ), 0.35);
         this.playerVelocity = new THREE.Vector3();
         this.playerDirection = new THREE.Vector3();
         this.playerOnFloor = false;
-        this.mouseTime = 0;
         this.keyStates = {};
-        this.vector1 = new THREE.Vector3();
-        this.vector2 = new THREE.Vector3();
-        this.vector3 = new THREE.Vector3();
+
+        this.player = new Player(this.scene, this.camera);
+        this.controler = new Controler(this.player,this.camera);
         this.onResizeFun = this.onWindowResize;
 
 
@@ -140,13 +131,13 @@ class Game{
 
         for ( let i = 0; i < this.STEPS_PER_FRAME; i ++ ) {
 
-            // controls( deltaTime );
-            //
-            // updatePlayer( deltaTime );
-            //
-            // updateSpheres( deltaTime );
-            //
-            // teleportPlayerIfOob();
+            this.controler.walk(deltaTime);
+
+            this.player.updatePlayer(deltaTime);
+
+            this.player.updateSpheres(deltaTime);
+
+            this.player.teleportPlayerIfOob();
 
         }
 

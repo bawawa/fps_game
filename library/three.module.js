@@ -11472,6 +11472,7 @@ class PerspectiveCamera extends Camera {
 		this.filmOffset = 0;	// horizontal film offset (same unit as gauge)
 
 		this.updateProjectionMatrix();
+        this.position = undefined;
 
 	}
 
