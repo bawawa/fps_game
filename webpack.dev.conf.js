@@ -10,6 +10,9 @@ const config = {
     entry: {
         app:"./index.ts"
     },
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js', '.jsx']
+    },
     plugins: [
         new HTMLWebpackPlugin({
             title: "FPS Game",
@@ -34,9 +37,14 @@ const config = {
         rules: [ // 第三方匹配规则
             {
                 test: /\.js|jsx$/,
-                use: 'babel-loader',
+                loader: 'babel-loader',
                 exclude: /node_modules/
             }, // 千万别忘记添加 exclude 排除项
+            {
+                test: /\.tsx?$/,
+                use: "awesome-typescript-loader",
+                exclude: /node_modules/
+            },
             {
                 test: /\.(png|jpg|gif)$/,
                 use: [
