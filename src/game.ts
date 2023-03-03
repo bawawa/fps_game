@@ -20,7 +20,7 @@ class Game{
     //方向光
     directionalLight: any;
     //容器
-    container: HTMLElement;
+    container: HTMLElement | null;
     //渲染器
     renderer: any;
     //重力
@@ -38,11 +38,6 @@ class Game{
     readonly STEPS_PER_FRAME: number;
     readonly sphereGeometry: THREE.IcosahedronGeometry;
     readonly sphereMaterial: THREE.MeshLambertMaterial;
-    readonly playerVelocity: THREE.Vector3;
-    readonly playerDirection: THREE.Vector3;
-
-
-    playerOnFloor: boolean;
     keyStates: any;
     onResizeFun: Function;
     player: Player;
@@ -55,7 +50,6 @@ class Game{
         this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.fillLight1 = new THREE.HemisphereLight( 0x4488bb, 0x002244, 0.5 );
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        // @ts-ignore
         this.container = document.getElementById("container");
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.GRAVITY = 30;
@@ -63,11 +57,7 @@ class Game{
         this.SPHERE_RADIUS = 0.2;
         this.sphereGeometry = new THREE.IcosahedronGeometry( this.SPHERE_RADIUS, 5 );
         this.sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xbbbb44 } );
-        this.playerVelocity = new THREE.Vector3();
-        this.playerDirection = new THREE.Vector3();
-        this.playerOnFloor = false;
         this.keyStates = {};
-
         this.player = new Player(this.scene, this.camera);
         this.controler = new Controler(this.player,this.camera);
         this.onResizeFun = this.onWindowResize;
@@ -103,12 +93,11 @@ class Game{
         this.renderer.shadowMap.type = THREE.VSMShadowMap;
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.container.appendChild( this.renderer.domElement );
+        this.container?.appendChild( this.renderer.domElement );
 
-        window.addEventListener('resize', this.onResizeFun())
+        window.addEventListener('resize', ()=>this.onResizeFun())
 
-
-
+        this.animate();
     }
 
     destroy(){
@@ -146,7 +135,7 @@ class Game{
         this.renderer.render( this.scene, this.camera );
 
 
-        requestAnimationFrame( this.animate );
+        requestAnimationFrame( ()=>this.animate );
 
     }
 

@@ -69,7 +69,8 @@ class Player{
     }
 
     load_player_model(){
-        this.loader.load('',gltf=>{
+        this.loader.load('https://storage.360buyimg.com/hair-mp/collision-world.glb',gltf=>{
+            console.log(gltf)
             this.scene.add(gltf.scene);
             this.worldOctree.fromGraphNode( gltf.scene );
         })
