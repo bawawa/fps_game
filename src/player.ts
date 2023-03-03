@@ -1,7 +1,7 @@
-import * as THREE from '../library/three.module';
-import { GLTFLoader } from '../library/GLTFLoader';
-import {Octree} from '../library/math/Octree';
-import {Capsule} from '../library/math/Capsule'
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import {Octree} from 'three/examples/jsm/math/Octree';
+import {Capsule} from 'three/examples/jsm/math/Capsule'
 
 const GRAVITY = 9.8;
 interface bulletAttr{
@@ -134,7 +134,7 @@ class Player{
         }
     }
 
-    updateSpheres( deltaTime ) {
+    updateSpheres( deltaTime: number ) {
 
         this.spheres.forEach( sphere => {
 
@@ -170,7 +170,7 @@ class Player{
 
     }
 
-    playerSphereCollision( sphere ) {
+    playerSphereCollision( sphere: bulletAttr ) {
 
         const center = this.vector1.addVectors( this.playerCollider.start, this.playerCollider.end ).multiplyScalar( 0.5 );
 

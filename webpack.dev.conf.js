@@ -2,17 +2,9 @@ const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 let  env=process.env.NODE_ENV==="development"?"development":"production";
 
-
-
-const config = {
-    mode: env,
-    devtool: 'source-map',
-    entry: {
-        app:"./index.ts"
-    },
-    resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.jsx']
-    },
+module.exports = {
+    entry: './index.ts',
+    devtool: 'eval-source-map',
     plugins: [
         new HTMLWebpackPlugin({
             title: "FPS Game",
@@ -26,44 +18,28 @@ const config = {
         })
     ],
     devServer:{
-        contentBase: path.join(__dirname, ''),
-        clientLogLevel: 'info',
-        open:false,  //启动时默认打开浏览器
-        host:'localhost', //域名 0.0.0.0局域网可访问
-        port:'8080',
-        inline:true, //实时更新
+        static: {
+            directory: path.join(__dirname, '../../dist/client'),
+        },
+        hot: true,
     },
-    module: { // 所有第三方 模块的配置规则
-        rules: [ // 第三方匹配规则
-            {
-                test: /\.js|jsx$/,
-                loader: 'babel-loader',
-                exclude: /node_modules/
-            }, // 千万别忘记添加 exclude 排除项
+    module: {
+        rules: [
             {
                 test: /\.tsx?$/,
-                use: "awesome-typescript-loader",
-                exclude: /node_modules/
+                use: 'ts-loader',
+                exclude: /node_modules/,
             },
-            {
-                test: /\.(png|jpg|gif)$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            limit:50000,
-                            outputPath:"./images",
-                            name: '[path][name].[ext]',
-                            publicPath: 'assets/images'
-                        }
-                    }
-                ]
-            }
-        ]
+        ],
     },
-    optimization: {
-
+    resolve: {
+        alias: {
+            three: path.resolve('./library/three.module.js')
+        },
+        extensions: ['.tsx', '.ts', '.js'],
     },
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, '../../dist/client'),
+    }
 };
-
-module.exports = config;

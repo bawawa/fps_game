@@ -1,4 +1,4 @@
-import * as THREE from '../library/three.module'
+import * as THREE from 'three'
 
 import Player from "./player";
 import Controler from "./Controler";
@@ -55,10 +55,12 @@ class Game{
         this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.fillLight1 = new THREE.HemisphereLight( 0x4488bb, 0x002244, 0.5 );
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        // @ts-ignore
         this.container = document.getElementById("container");
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.GRAVITY = 30;
         this.STEPS_PER_FRAME = 5;
+        this.SPHERE_RADIUS = 0.2;
         this.sphereGeometry = new THREE.IcosahedronGeometry( this.SPHERE_RADIUS, 5 );
         this.sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xbbbb44 } );
         this.playerVelocity = new THREE.Vector3();

@@ -1,5 +1,5 @@
 import Player from "./player";
-import * as THREE from '../library/three.module';
+import * as THREE from 'three';
 
 class Controler{
     player: Player;
