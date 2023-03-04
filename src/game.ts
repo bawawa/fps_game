@@ -39,7 +39,7 @@ class Game{
     readonly sphereGeometry: THREE.IcosahedronGeometry;
     readonly sphereMaterial: THREE.MeshLambertMaterial;
     keyStates: any;
-    onResizeFun: Function;
+    onResizeFun: ()=>void;
     player: Player;
     controler: Controler;
 
@@ -60,7 +60,7 @@ class Game{
         this.keyStates = {};
         this.player = new Player(this.scene, this.camera);
         this.controler = new Controler(this.player,this.camera);
-        this.onResizeFun = this.onWindowResize;
+        this.onResizeFun = this.onWindowResize.bind(this);
 
 
         this.init();
@@ -95,13 +95,13 @@ class Game{
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.container?.appendChild( this.renderer.domElement );
 
-        window.addEventListener('resize', ()=>this.onResizeFun())
+        window.addEventListener('resize', this.onResizeFun)
 
         this.animate();
     }
 
     destroy(){
-        window.removeEventListener('resize', this.onResizeFun());
+        window.removeEventListener('resize', this.onResizeFun);
     }
 
     onWindowResize() {

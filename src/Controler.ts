@@ -5,25 +5,29 @@ class Controler{
     player: Player;
     camera: THREE.PerspectiveCamera;
     keyStates: any;
-    keyDown: Function;
-    keyUp: Function;
-    mouseDown: Function;
-    mouseUp: Function;
+    keyDown: (event: KeyboardEvent)=>void;
+    keyUp: (event: KeyboardEvent)=>void;
+    mouseDown: ()=>void;
+    mouseUp: ()=>void;
+    mouseMove: (event: MouseEvent)=>void;
     constructor(player: Player, camera: THREE.PerspectiveCamera) {
         this.player = player;
         this.keyStates = {};
         this.camera = camera;
-        this.keyDown = this.handle_key_down;
-        this.keyUp = this.handle_key_up;
-        this.mouseDown = this.handle_mouse_down;
-        this.mouseUp = this.handle_mouse_up;
+        this.keyDown = this.handle_key_down.bind(this);
+        this.keyUp = this.handle_key_up.bind(this);
+        this.mouseDown = this.handle_mouse_down.bind(this);
+        this.mouseUp = this.handle_mouse_up.bind(this);
+        this.mouseMove = this.handle_mouse_move.bind(this);
+        this.init();
     }
 
     init(){
-        document.addEventListener("keydown", this.keyDown());
-        document.addEventListener("keyup", this.keyUp());
-        document.addEventListener( 'mousedown', this.mouseDown());
-        document.addEventListener( 'mouseup', this.mouseUp());
+        document.addEventListener("keydown", this.keyDown);
+        document.addEventListener("keyup", this.keyUp);
+        document.addEventListener( 'mousedown', this.mouseDown);
+        document.addEventListener( 'mouseup', this.mouseUp);
+        document.addEventListener("mousemove", this.mouseMove);
     }
 
     handle_key_down(event: KeyboardEvent){
@@ -45,6 +49,17 @@ class Controler{
             this.player.throwBall();
         }
     }
+
+    handle_mouse_move( event: MouseEvent ){
+
+    if ( document.pointerLockElement === document.body ) {
+
+    this.camera.rotation.y -= event.movementX / 500;
+    this.camera.rotation.x -= event.movementY / 500;
+
+}
+
+}
     /**
      * 行走函数
      * */
@@ -109,10 +124,11 @@ class Controler{
     }
 
     destroy(){
-        document.removeEventListener("keydown", this.keyDown());
-        document.removeEventListener("keyup", this.keyUp());
-        document.removeEventListener( 'mousedown', this.mouseDown());
-        document.removeEventListener( 'mouseup', this.mouseUp());
+        document.removeEventListener("keydown", this.keyDown);
+        document.removeEventListener("keyup", this.keyUp);
+        document.removeEventListener( 'mousedown', this.mouseDown);
+        document.removeEventListener( 'mouseup', this.mouseUp);
+        document.removeEventListener( 'mousemove', this.mouseMove);
     }
 }
 export default Controler;
