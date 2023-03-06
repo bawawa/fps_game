@@ -42,6 +42,7 @@ class Game{
     onResizeFun: ()=>void;
     player: Player;
     controler: Controler;
+    animateFunc: ()=>void
 
 
     constructor() {
@@ -61,6 +62,7 @@ class Game{
         this.player = new Player(this.scene, this.camera);
         this.controler = new Controler(this.player,this.camera);
         this.onResizeFun = this.onWindowResize.bind(this);
+        this.animateFunc = this.animate.bind(this);
 
 
         this.init();
@@ -135,7 +137,7 @@ class Game{
         this.renderer.render( this.scene, this.camera );
 
 
-        requestAnimationFrame( this.animate );
+        requestAnimationFrame( this.animateFunc );
 
     }
 
