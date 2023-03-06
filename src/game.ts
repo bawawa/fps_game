@@ -135,7 +135,7 @@ class Game{
         this.renderer.render( this.scene, this.camera );
 
 
-        requestAnimationFrame( ()=>this.animate );
+        requestAnimationFrame( this.animate );
 
     }
 
