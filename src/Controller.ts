@@ -1,7 +1,7 @@
-import Player from "./player";
+import Player from "./Player";
 import * as THREE from 'three';
 
-class Controler{
+class Controller{
     player: Player;
     camera: THREE.PerspectiveCamera;
     keyStates: any;
@@ -22,7 +22,7 @@ class Controler{
         this.init();
     }
 
-    init(){
+    private init(){
         document.addEventListener("keydown", this.keyDown);
         document.addEventListener("keyup", this.keyUp);
         document.addEventListener( 'mousedown', this.mouseDown);
@@ -30,12 +30,36 @@ class Controler{
         document.addEventListener("mousemove", this.mouseMove);
     }
 
+    private judgeWalk(){
+        if(this.keyStates['KeyW'] || this.keyStates['KeyS'] || this.keyStates['KeyA'] || this.keyStates['KeyD']){
+            if(this.keyStates['ShiftLeft'] || this.keyStates['ShiftRight']){
+
+                this.player.walkAction?.stop();
+                this.player.idleAction?.stop();
+                this.player.runAction?.play();
+
+            }else {
+
+                this.player.idleAction?.stop();
+                this.player.runAction?.stop();
+                this.player.walkAction?.play();
+
+            }
+        }else {
+            this.player.walkAction?.stop();
+            this.player.runAction?.stop();
+            this.player.idleAction?.play();
+        }
+    }
+
     handle_key_down(event: KeyboardEvent){
         this.keyStates[ event.code ] = true;
+        this.judgeWalk();
     }
 
     handle_key_up(event: KeyboardEvent){
         this.keyStates[ event.code ] = false;
+        this.judgeWalk()
     }
 
     handle_mouse_down(){
@@ -65,7 +89,16 @@ class Controler{
      * */
     walk(deltaTime: number){
         // gives a bit of air control
-        const speedDelta = deltaTime * ( this.player.playerOnFloor ? 25 : 8 );
+
+        let speedDelta = 0;
+        if(!this.player.playerOnFloor){
+            speedDelta = deltaTime * 5;
+        }else if(this.keyStates['ShiftLeft'] || this.keyStates['ShiftRight']){
+            speedDelta = deltaTime * 20;
+        }else {
+            speedDelta = deltaTime * 8;
+        }
+
 
         if ( this.keyStates[ 'KeyW' ] ) {
 
@@ -81,13 +114,13 @@ class Controler{
 
         if ( this.keyStates[ 'KeyA' ] ) {
 
-            this.player.playerVelocity.add( this.getSideVector().multiplyScalar( - speedDelta ) );
+            this.player.playerVelocity.add( this.getSideVector().multiplyScalar( - speedDelta * 1.5 ) );
 
         }
 
         if ( this.keyStates[ 'KeyD' ] ) {
 
-            this.player.playerVelocity.add( this.getSideVector().multiplyScalar( speedDelta ) );
+            this.player.playerVelocity.add( this.getSideVector().multiplyScalar( speedDelta * 1.5 ) );
 
         }
 
@@ -131,4 +164,4 @@ class Controler{
         document.removeEventListener( 'mousemove', this.mouseMove);
     }
 }
-export default Controler;
+export default Controller;

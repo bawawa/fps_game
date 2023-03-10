@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 import Player from "./player";
-import Controler from "./Controler";
+import Controller from "./Controller";
 import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {Octree} from 'three/examples/jsm/math/Octree'
 import {Group} from "three";
@@ -47,7 +47,7 @@ class Game{
     keyStates: any;
     onResizeFun: ()=>void;
     player: Player;
-    controler: Controler;
+    controler: Controller;
     animateFunc: ()=>void
 
 
@@ -69,7 +69,7 @@ class Game{
         this.sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xbbbb44 } );
         this.keyStates = {};
         this.player = new Player(this.scene, this.camera, this.worldOctree);
-        this.controler = new Controler(this.player,this.camera);
+        this.controler = new Controller(this.player,this.camera);
         this.onResizeFun = this.onWindowResize.bind(this);
         this.animateFunc = this.animate.bind(this);
 
