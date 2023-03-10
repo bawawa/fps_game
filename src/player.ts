@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {Octree} from 'three/examples/jsm/math/Octree';
 import {Capsule} from 'three/examples/jsm/math/Capsule'
-import {Group} from "three";
+import {AnimationAction, AnimationClip, AnimationMixer, Group, Object3D} from "three";
 
 const GRAVITY = 40;
 interface bulletAttr{
@@ -19,6 +19,10 @@ class Player{
     sphereIdx: number;
     mouseTime: number;
     playerModel: Group | null;
+    mixer: AnimationMixer | null;
+    idleAction: AnimationAction | null;
+    walkAction: AnimationAction | null;
+    runAction: AnimationAction | null;
     readonly PLAYER_MODEL: string;
     readonly SPHERE_RADIUS: number;
     readonly NUM_SPHERES: number;
@@ -49,6 +53,10 @@ class Player{
         this.vector3 = new THREE.Vector3();
         this.sphereIdx = 0;
         this.mouseTime = 0;
+        this.mixer = null;
+        this.idleAction = null;
+        this.walkAction = null;
+        this.runAction = null;
         this.PLAYER_MODEL = "https://storage.360buyimg.com/hair-mp/Soldier.glb";
         this.init();
     }
@@ -74,9 +82,17 @@ class Player{
     }
 
     load_player_model(){
-        this.loader.load(this.PLAYER_MODEL,gltf=>{
-            this.playerModel = gltf.scene
+        this.loader.load(this.PLAYER_MODEL,(gltf:GLTF)=>{
+            this.playerModel = gltf.scene;
+            const animations = gltf.animations;
             this.scene.add(gltf.scene);
+            this.mixer = new AnimationMixer(this.playerModel);
+            this.idleAction = this.mixer.clipAction( animations[ 0 ] );
+            this.walkAction = this.mixer.clipAction(animations[ 3 ]);
+            this.runAction = this.mixer.clipAction(animations[ 1 ]);
+            this.playerModel.traverse( ( object: any )=> {
+                if ( object?.isMesh ) object.castShadow = true;
+            } );
         })
     }
 
@@ -97,6 +113,7 @@ class Player{
 
         const deltaPosition = this.playerVelocity.clone().multiplyScalar( deltaTime );
         this.playerCollider.translate( deltaPosition );
+        this.mixer?.update(deltaTime);
 
         this.playerCollisions();
 
