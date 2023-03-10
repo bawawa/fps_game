@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import {Octree} from 'three/examples/jsm/math/Octree';
 import {Capsule} from 'three/examples/jsm/math/Capsule'
+import {Group} from "three";
 
-const GRAVITY = 9.8;
+const GRAVITY = 40;
 interface bulletAttr{
     mesh: THREE.Mesh;
     collider: THREE.Sphere;
@@ -17,6 +18,8 @@ class Player{
     playerDirection: THREE.Vector3;
     sphereIdx: number;
     mouseTime: number;
+    playerModel: Group | null;
+    readonly PLAYER_MODEL: string;
     readonly SPHERE_RADIUS: number;
     readonly NUM_SPHERES: number;
     readonly loader: GLTFLoader;
@@ -28,7 +31,8 @@ class Player{
     readonly vector3: THREE.Vector3;
 
 
-    constructor(scene: THREE.Scene, camera: any) {
+    constructor(scene: THREE.Scene, camera: any, worldOctree: Octree) {
+        this.playerModel = null;
         this.spheres = [];
         this.camera = camera;
         this.NUM_SPHERES = 100;
@@ -38,13 +42,14 @@ class Player{
         this.playerVelocity = new THREE.Vector3();
         this.playerDirection = new THREE.Vector3();
         this.loader = new GLTFLoader();
-        this.worldOctree = new Octree();
+        this.worldOctree = worldOctree;
         this.playerCollider = new Capsule(new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 1, 0 ), 0.35);
         this.vector1 = new THREE.Vector3();
         this.vector2 = new THREE.Vector3();
         this.vector3 = new THREE.Vector3();
         this.sphereIdx = 0;
         this.mouseTime = 0;
+        this.PLAYER_MODEL = "https://storage.360buyimg.com/hair-mp/Soldier.glb";
         this.init();
     }
 
@@ -69,10 +74,9 @@ class Player{
     }
 
     load_player_model(){
-        this.loader.load('https://storage.360buyimg.com/hair-mp/collision-world.glb',gltf=>{
-            console.log(gltf)
+        this.loader.load(this.PLAYER_MODEL,gltf=>{
+            this.playerModel = gltf.scene
             this.scene.add(gltf.scene);
-            this.worldOctree.fromGraphNode( gltf.scene );
         })
     }
 

@@ -2,6 +2,9 @@ import * as THREE from 'three'
 
 import Player from "./player";
 import Controler from "./Controler";
+import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
+import {Octree} from 'three/examples/jsm/math/Octree'
+import {Group} from "three";
 
 interface bulletAttr{
     mesh: THREE.Mesh;
@@ -35,6 +38,9 @@ class Game{
     /**
      * TODO：使用方法
      * */
+    readonly worldOctree: Octree;
+    readonly gltfLoader: GLTFLoader;
+    readonly SCENE_MODEL: string
     readonly STEPS_PER_FRAME: number;
     readonly sphereGeometry: THREE.IcosahedronGeometry;
     readonly sphereMaterial: THREE.MeshLambertMaterial;
@@ -46,6 +52,9 @@ class Game{
 
 
     constructor() {
+        this.worldOctree = new Octree();
+        this.gltfLoader = new GLTFLoader();
+        this.SCENE_MODEL = "https://storage.360buyimg.com/hair-mp/collision-world.glb";
         this.clock = new THREE.Clock();
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -59,7 +68,7 @@ class Game{
         this.sphereGeometry = new THREE.IcosahedronGeometry( this.SPHERE_RADIUS, 5 );
         this.sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xbbbb44 } );
         this.keyStates = {};
-        this.player = new Player(this.scene, this.camera);
+        this.player = new Player(this.scene, this.camera, this.worldOctree);
         this.controler = new Controler(this.player,this.camera);
         this.onResizeFun = this.onWindowResize.bind(this);
         this.animateFunc = this.animate.bind(this);
@@ -96,6 +105,10 @@ class Game{
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.container?.appendChild( this.renderer.domElement );
+        this.gltfLoader.load(this.SCENE_MODEL,(gltf:GLTF)=>{
+            this.scene.add(gltf.scene);
+            this.worldOctree.fromGraphNode( gltf.scene );
+        })
 
         window.addEventListener('resize', this.onResizeFun)
 
