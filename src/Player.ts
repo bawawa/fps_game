@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {Octree} from 'three/examples/jsm/math/Octree';
 import {Capsule} from 'three/examples/jsm/math/Capsule'
-import {AnimationAction, AnimationClip, AnimationMixer, Group, Object3D} from "three";
+import {AnimationAction, AnimationMixer, Group} from "three";
 
 const GRAVITY = 40;
 interface bulletAttr{
@@ -33,15 +33,16 @@ class Player{
     readonly vector1: THREE.Vector3;
     readonly vector2: THREE.Vector3;
     readonly vector3: THREE.Vector3;
+    readonly BULLET_SPEED: number
 
 
     constructor(scene: THREE.Scene, camera: any, worldOctree: Octree) {
         this.playerModel = null;
         this.spheres = [];
         this.camera = camera;
-        this.NUM_SPHERES = 100;
+        this.NUM_SPHERES = 1;
         this.scene = scene;
-        this.SPHERE_RADIUS = 0.2;
+        this.SPHERE_RADIUS = 0.05;
         this.playerOnFloor = true;
         this.playerVelocity = new THREE.Vector3();
         this.playerDirection = new THREE.Vector3();
@@ -58,14 +59,21 @@ class Player{
         this.walkAction = null;
         this.runAction = null;
         this.PLAYER_MODEL = "https://storage.360buyimg.com/hair-mp/Soldier.glb";
+        this.BULLET_SPEED = 50;
         this.init();
     }
 
     init(){
-        for ( let i = 0; i < this.NUM_SPHERES; i ++ ) {
+        const crosshairGeometry = new THREE.CircleGeometry( 0.02, 32 );
+        const crosshairMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+        const crosshair = new THREE.Mesh( crosshairGeometry, crosshairMaterial );
+        crosshair.position.set( window.innerWidth / 2, window.innerHeight / 2, 0 );
+        this.scene.add( crosshair );
 
-            // @ts-ignore
-            const sphere = new THREE.Mesh( this.sphereGeometry, this.sphereMaterial );
+        const sphereGeometry = new THREE.SphereGeometry( this.SPHERE_RADIUS, 16, 16 );
+        const sphereMaterial = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+        for ( let i = 0; i < this.NUM_SPHERES; i ++ ) {
+            const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
             sphere.castShadow = true;
             sphere.receiveShadow = true;
 
@@ -85,7 +93,7 @@ class Player{
         this.loader.load(this.PLAYER_MODEL,(gltf:GLTF)=>{
             this.playerModel = gltf.scene;
             const animations = gltf.animations;
-            this.scene.add(gltf.scene);
+            this.scene.add(this.playerModel);
             this.mixer = new AnimationMixer(this.playerModel);
             this.idleAction = this.mixer.clipAction( animations[ 0 ] );
             this.walkAction = this.mixer.clipAction(animations[ 3 ]);
@@ -143,6 +151,9 @@ class Player{
 
     }
 
+    /**
+     * 跌落复活
+     * */
     teleportPlayerIfOob() {
 
         if (this.camera.position.y <= -25) {
@@ -165,17 +176,19 @@ class Player{
             const result = this.worldOctree.sphereIntersect( sphere.collider );
 
             if ( result ) {
+                console.log("-----",sphere.collider)
 
                 sphere.velocity.addScaledVector( result.normal, - result.normal.dot( sphere.velocity ) * 1.5 );
                 sphere.collider.center.add( result.normal.multiplyScalar( result.depth ) );
 
             } else {
 
-                sphere.velocity.y -= GRAVITY * deltaTime;
+                // sphere.velocity.y -= GRAVITY * deltaTime;
 
             }
 
-            const damping = Math.exp( - 1.5 * deltaTime ) - 1;
+            // const damping = Math.exp( - 1.5 * deltaTime ) - 1;
+            const damping =0;
             sphere.velocity.addScaledVector( sphere.velocity, damping );
 
             this.playerSphereCollision( sphere );
@@ -185,9 +198,7 @@ class Player{
         this.spheresCollisions();
 
         for ( const sphere of this.spheres ) {
-            //@ts-ignore
             sphere.mesh.position.copy( sphere.collider.center );
-
         }
 
     }
@@ -271,13 +282,13 @@ class Player{
 
         // throw the ball with more force if we hold the button longer, and if we move forward
 
-        const impulse = 15 + 30 * ( 1 - Math.exp( ( this.mouseTime - performance.now() ) * 0.001 ) );
+        // const impulse = 15 + 30 * ( 1 - Math.exp( ( this.mouseTime - performance.now() ) * 0.01 ) );
+        const impulse = this.BULLET_SPEED;
 
         sphere.velocity.copy( this.playerDirection ).multiplyScalar( impulse );
         sphere.velocity.addScaledVector( this.playerVelocity, 2 );
 
         this.sphereIdx = ( this.sphereIdx + 1 ) % this.spheres.length;
-
     }
 }
 
